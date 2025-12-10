@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Promedios - Mecatrónica Automotriz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .search-box {
+            margin-bottom: 30px;
+        }
+
+        .search-box label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+        }
+
+        .result-label {
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .promedio-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .promedio-alto {
+            background: #4caf50;
+            color: white;
+        }
+
+        .promedio-medio {
+            background: #ff9800;
+            color: white;
+        }
+
+        .promedio-bajo {
+            background: #f44336;
+            color: white;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Consulta de Promedios</h1>
+            <p>Mecatrónica Automotriz - Periodo IV 2025</p>
+            <p style="font-size: 12px; margin-top: 5px;">Unidad Didáctica: Ofimática</p>
+            <span class="badge">🔒 Sistema Protegido</span>
+        </div>
+
+        <div class="search-box">
+            <label for="dni">Ingresa tu DNI:</label>
+            <div class="input-group">
+                <input type="text" id="dni" placeholder="Ejemplo: 61169075" maxlength="8" pattern="[0-9]*"
+                    autocomplete="off">
+            </div>
+            <button class="search-btn" onclick="buscarAlumno()">🔍 Buscar Promedio</button>
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-item">
+                <div class="result-label">DNI</div>
+                <div class="result-value" id="resultDni">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Apellidos y Nombres</div>
+                <div class="result-value" id="resultNombre">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Promedio Final</div>
+                <div id="resultPromedio"></div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            ❌ DNI no encontrado. Verifica que hayas ingresado correctamente tu número de documento.
+        </div>
+
+        <div class="footer">
+            Sistema de Consulta de Notas © 2025
+        </div>
+    </div>
+
+    <script>
+        // Protecciones básicas
+        (function () {
+            // Deshabilitar clic derecho
+            document.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Deshabilitar teclas de desarrollador
+            document.addEventListener('keydown', function (e) {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+C
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+J
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U (ver código fuente)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Detectar si DevTools está abierto
+            const detectDevTools = () => {
+                const threshold = 160;
+                if (window.outerWidth - window.innerWidth > threshold ||
+                    window.outerHeight - window.innerHeight > threshold) {
+                    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-size:24px;color:#f44336;text-align:center;padding:20px;">⚠️ Acceso no autorizado detectado.<br>Por favor, cierra las herramientas de desarrollador.</div>';
+                }
+            };
+
+            // Verificar cada segundo
+            setInterval(detectDevTools, 1000);
+            detectDevTools();
+        })();
+
+        // Datos codificados en Base64 (ofuscación básica)
+        const _0x4a2b = atob('eyJhbHVtbm9zIjogW3siZG5pIjogIjYyNjg4NjExIiwgImFwZWxsaWRvc19ub21icmVzIjogIkFNQVlBIEJBUlJJRU5UT1MsIENyaXN0aWFubyBGcmFuY28iLCAicHJvbWVkaW8iOiAwfSwgeyJkbmkiOiAiNjExNjkwMTUiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiQU5UT04gTUVORE9aQSwgTWFudWVsIEFsZXhpcyIsICJwcm9tZWRpbyI6IDEzfSwgeyJkbmkiOiAiNjI2ODkwNTAiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiQVRPQ0hFIENPUkRFUk8sIFJ1dGggQWJpZ2FpbCIsICJwcm9tZWRpbyI6IDE1fSwgeyJkbmkiOiAiNjEzNDEzNDUiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiQkVOSVRFUyBTRVJOQVFVRSwgRmFiaWFuYSBBYmlnYWlsIiwgInByb21lZGlvIjogMTZ9LCB7ImRuaSI6ICI3NDMxNDU2OSIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJCUlVOTyBBTlRPTiwgTWF0dGhldyBHYWJyaWVsIiwgInByb21lZGlvIjogMTV9LCB7ImRuaSI6ICI2MTE2ODU2MyIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJDQUxMRSBTVUxMT04sIERheWFuYSBBbGV4YW5kcmEiLCAicHJvbWVkaW8iOiAxNX0sIHsiZG5pIjogIjYxMzQxNDE1IiwgImFwZWxsaWRvc19ub21icmVzIjogIkNBUlJBU0NPIEdBUkNJQSwgQW5nZWxhIEdhYnJpZWxhIiwgInByb21lZGlvIjogNn0sIHsiZG5pIjogIjc2NDY4NzI2IiwgImFwZWxsaWRvc19ub21icmVzIjogIkNBU1RJTExPIFJPU0FMRVMsIEpvcmdlIEx1aXMiLCAicHJvbWVkaW8iOiAwfSwgeyJkbmkiOiAiNzU0NTI1OTIiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiQ0FTVElMTE8gWUFNVU5BUVVFLCBKdWFuIFNhbnRpYWdvIiwgInByb21lZGlvIjogNn0sIHsiZG5pIjogIjYxMzQxNDcxIiwgImFwZWxsaWRvc19ub21icmVzIjogIkNISVJBIERJT1NFUywgRGFyY3kgTWFyaWEiLCAicHJvbWVkaW8iOiAxNn0sIHsiZG5pIjogIjcyNDk1MjYzIiwgImFwZWxsaWRvc19ub21icmVzIjogIkNIT1JSRVMgQ1JVWiwgTHVpcyBBbGJlcnRvIiwgInByb21lZGlvIjogMTV9LCB7ImRuaSI6ICI3NjM0OTE1OCIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJDTEFWSUpPIFJVSVosIEJyYWpoYW4gRGFuaWVsIiwgInByb21lZGlvIjogMTZ9LCB7ImRuaSI6ICI2MDUzNTQyOCIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJDT1ZFw5FBUyBSVUVTVEEsIEJsYW5jYSBMdWNlcm8iLCAicHJvbWVkaW8iOiAxNX0sIHsiZG5pIjogIjc1MzYyOTY5IiwgImFwZWxsaWRvc19ub21icmVzIjogIkRFTEdBRE8gQ0hFQ0NPLCBEYXZpZCBTYW11ZWwiLCAicHJvbWVkaW8iOiAxNn0sIHsiZG5pIjogIjYyMzI3NDgzIiwgImFwZWxsaWRvc19ub21icmVzIjogIkVDSEUgQ09SRE9WQSwgRWxpemEgR2lzZXQiLCAicHJvbWVkaW8iOiAxM30sIHsiZG5pIjogIjc0NzcwMzc5IiwgImFwZWxsaWRvc19ub21icmVzIjogIkVTUElOT1pBIFNBQVZFRFJBLCBSYXF1ZWwgRGUgTG9zIEFuZ2VsZXMiLCAicHJvbWVkaW8iOiAxNn0sIHsiZG5pIjogIjc0OTIyNjUwIiwgImFwZWxsaWRvc19ub21icmVzIjogIkdBT05BIEdVRVJSRVJPLCBKdXN0aW4gR2FicmllbCIsICJwcm9tZWRpbyI6IDE1fSwgeyJkbmkiOiAiNjEzNDEzNzUiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiR0FSQ0lBIE5PTEUsIFl1ZGFueSBKYXNtaW4iLCAicHJvbWVkaW8iOiAxM30sIHsiZG5pIjogIjYxNTA5Njk2IiwgImFwZWxsaWRvc19ub21icmVzIjogIkdVQVJESUEgUVVJU1BFLCBMZWEgTm9lbWkiLCAicHJvbWVkaW8iOiAxNX0sIHsiZG5pIjogIjYwODQzODE0IiwgImFwZWxsaWRvc19ub21icmVzIjogIkdVRVJSRVJPIFNJTFZBLCBSb2RyaWdvIE1hcnRpbiIsICJwcm9tZWRpbyI6IDB9LCB7ImRuaSI6ICI2MTE2OTA3MyIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJNRURJTkEgQ1JVWiwgS2VpbGEgQmVydGhhIiwgInByb21lZGlvIjogMTZ9LCB7ImRuaSI6ICI3MjQ5Mjk3MiIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJNT1JBTEVTIFpBUEFUQSwgT2xlbmthIEx1Y3JlY2lhIiwgInByb21lZGlvIjogMTV9LCB7ImRuaSI6ICI3NzM0OTE1NiIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJNT1JBTiBQQVpPUywgUm9zYWxpbmRhIiwgInByb21lZGlvIjogMTN9LCB7ImRuaSI6ICI2MDI1MzU0MiIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJSRVlFUyBDT1JORUpPLCBKb3NlcGggSmVhbnBpZXJlIiwgInByb21lZGlvIjogMTZ9LCB7ImRuaSI6ICI2MTQzNjc0NyIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJST0RSSUdPIFJPTkRPWSwgUm9zaXRhIE5pY29sZSIsICJwcm9tZWRpbyI6IDE0fSwgeyJkbmkiOiAiNjEzNDEzMTYiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiU0FBVkVEUkEgQkFSUklFTlRPUywgTWFyY2VsYSBGYXVzdGluYSIsICJwcm9tZWRpbyI6IDE3fSwgeyJkbmkiOiAiNjAyNTM1MzciLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiU0FBVkVEUkEgQ0FTVElMTE8sIExleWR5IERhbmlzaCIsICJwcm9tZWRpbyI6IDE2fSwgeyJkbmkiOiAiNjM0OTMwMjkiLCAiYXBlbGxpZG9zX25vbWJyZXMiOiAiVE9STyBTQU5DSEVaLCBGaW9yZWxhIGRlbCBQaWxhciIsICJwcm9tZWRpbyI6IDB9LCB7ImRuaSI6ICI3NjAzODQ0MyIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJWRUdBIFFVSU5ERSwgQWxvbnNvIFNtaXRoIiwgInByb21lZGlvIjogMTV9LCB7ImRuaSI6ICI2MDgxMTIyNSIsICJhcGVsbGlkb3Nfbm9tYnJlcyI6ICJaQVBBVEEgUVVFUkVWQUxVLCBBcmlhbmEiLCAicHJvbWVkaW8iOiAxNn0sIHsiZG5pIjogIjYxMTY5MjQ5IiwgImFwZWxsaWRvc19ub21icmVzIjogIlpFVkFMTE9TIENPUlJFQSwgQ2FybG9zIEFsYmVydG8iLCAicHJvbWVkaW8iOiAwfV19');
+        const alumnosData = JSON.parse(_0x4a2b);
+
+        function buscarAlumno() {
+            const dniInput = document.getElementById('dni').value.trim();
+            const resultCard = document.getElementById('resultCard');
+            const errorMessage = document.getElementById('errorMessage');
+
+            resultCard.classList.remove('show');
+            errorMessage.classList.remove('show');
+
+            if (!dniInput) {
+                errorMessage.textContent = '⚠️ Por favor, ingresa tu DNI.';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            const alumno = alumnosData.alumnos.find(a => a.dni === dniInput);
+
+            if (alumno) {
+                document.getElementById('resultDni').textContent = alumno.dni;
+                document.getElementById('resultNombre').textContent = alumno.apellidos_nombres;
+
+                const promedioDiv = document.getElementById('resultPromedio');
+                let clasePromedio = 'promedio-medio';
+                let mensaje = '';
+
+                if (alumno.promedio >= 16) {
+                    clasePromedio = 'promedio-alto';
+                    mensaje = '¡Excelente trabajo! 🎉';
+                } else if (alumno.promedio >= 14) {
+                    clasePromedio = 'promedio-medio';
+                    mensaje = '¡Buen rendimiento! 👍';
+                } else {
+                    clasePromedio = 'promedio-bajo';
+                    mensaje = 'Sigue esforzándote 💪';
+                }
+
+                promedioDiv.innerHTML = `
+                    <span class="promedio-badge ${clasePromedio}">${alumno.promedio}</span>
+                    <p style="margin-top: 10px; color: #666; font-size: 14px;">${mensaje}</p>
+                `;
+                resultCard.classList.add('show');
+            } else {
+                errorMessage.textContent = '❌ DNI no encontrado. Verifica que hayas ingresado correctamente tu número de documento.';
+                errorMessage.classList.add('show');
+            }
+        }
+
+        document.getElementById('dni').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                buscarAlumno();
+            }
+        });
+
+        document.getElementById('dni').addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('dni').focus();
+    </script>
+</body>
+
+</html>
